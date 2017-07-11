@@ -89,19 +89,19 @@ function reverseConvertDate(month){
 	
 	
 	function isOnlyNumeric(object,messageContent) {
-	if(object.search(/^[0-9]*$/) == -1) {
-        alert(window.lang.translate(messageContent+" should be numeric."));
-		return false;
-	}else {
-		return true;
+		if(object.search(/^[0-9]*$/) == -1) {
+			alert(messageContent+" should be numeric." );
+			return false;
+		}else {
+			return true;
+		}
 	}
-}
 
-function isZero(object,messageContent){
-	if(object == 0){
-        alert(window.lang.translate(messageContent+" should be greater than 0."));
-		return false;
-	}else{
-		return true;
+	function isZero(object,messageContent){
+		if(object == 0){
+			alert(messageContent+" should be greater than 0");
+			return false;
+		}else{
+			return true;
+		}
 	}
-}

@@ -1,10 +1,8 @@
 var j = jQuery.noConflict();
 var defaultPagePath='app/pages/';
 var headerMsg = "Expenzing";
-//var urlPath = 'http://1.255.255.36:13130/TnEV1_0AWeb/WebService/Login/'
-var WebServicePath ='http://1.255.255.214:8085/NexstepWebService/mobileLinkResolver.service';
+var urlPath = "http://1.255.255.214:8080/TnEV1_0AWeb/WebService/Login/";
 //var WebServicePath = 'http://live.nexstepapps.com:8284/NexstepWebService/mobileLinkResolver.service';
-//var WebServicePath ='http://1.255.255.36:9898/NexstepWebService/mobileLinkResolver.service';
 var clickedFlagCar = false;
 var clickedFlagTicket = false;
 var clickedFlagHotel = false;
@@ -27,12 +25,7 @@ var fileTempGalleryTS ="";
 var mapToCalcERAmt = new Map();
 var requestRunning = false;
 var flagForUnitEnable = false;
-var smsList = [];     
-var smsBodyString = "";  
-var smsToExpenseStr = "" ;
-var smsWatchFlagStatus = false;
-var expensePageFlag = '';		//S for smsExpenses And N for normal expenses
-var filtersStr = "";
+
 j(document).ready(function(){ 
 document.addEventListener("deviceready",loaded,false);
 });
@@ -49,8 +42,10 @@ function login()
     var jsonToBeSend=new Object();
     jsonToBeSend["user"] = userName.value;
     jsonToBeSend["pass"] = password.value;
-	//setUrlPathLocalStorage(urlPath);
-	urlPath=window.localStorage.getItem("urlPath");
+   	var headerBackBtn=defaultPagePath+'categoryMsgPage.html';
+	var pageRef=defaultPagePath+'category.html';
+    //urlPath=window.localStorage.getItem("urlPath");
+	 setUrlPathLocalStorage(urlPath);
 	j('#loading').show();
     j.ajax({
          url: urlPath+"LoginWebService",
@@ -60,20 +55,6 @@ function login()
          data: JSON.stringify(jsonToBeSend),
          success: function(data) {
          	if (data.Status == 'Success'){
-                
-                if(data.hasOwnProperty('multiLangInMobile') && data.multiLangInMobile != null &&
-                   data.multiLangInMobile){
-                       	var headerBackBtn=defaultPagePath+'withoutBckBtn.html';
-	                    var pageRef=defaultPagePath+'language.html';
-                    j('#mainHeader').load(headerBackBtn);
-                    j('#mainContainer').load(pageRef); 
-                       appPageHistory.push(pageRef);
-                    setUserStatusInLocalStorage("Valid");
-			        setUserSessionDetails(data,jsonToBeSend);
-                    j('#loading').hide();         
-        }else{
-            var headerBackBtn=defaultPagePath+'categoryMsgPage.html';
-	        var pageRef=defaultPagePath+'category.html';
         	 j('#mainHeader').load(headerBackBtn);
              j('#mainContainer').load(pageRef);
               appPageHistory.push(pageRef);
@@ -94,17 +75,6 @@ function login()
 				synchronizeTRForTS();  
 			  }
                 synchronizeBEMasterData();
-                
-                
-            if(data.hasOwnProperty('smartClaimsViaSMSOnMobile') && 
-                 data.smartClaimsViaSMSOnMobile != null){
-                  if(data.EaInMobile){
-                 synchronizeWhiteListMasterData();
-	               startWatch();
-                  }
-                 }
-                }
-			
 			}else if(data.Status == 'Failure'){
  			   successMessage = data.Message;
 			   if(successMessage.length == 0){
@@ -115,7 +85,7 @@ function login()
  			   j('#loading').hide();
            }else{
 			    j('#loading').hide();
-            alert(window.lang.translate('Please enter correct username or password'));
+             alert("Please enter correct username or password");
            }
 
          },
@@ -124,7 +94,7 @@ function login()
          }
    });
 
-}
+ }
  
 function commanLogin(){
  	var userName = document.getElementById("userName");
@@ -134,7 +104,6 @@ function commanLogin(){
 	jsonToDomainNameSend["userName"] = domainName;
 	jsonToDomainNameSend["mobilePlatform"] = device.platform;
 	//jsonToDomainNameSend["mobilePlatform"] = "Android";
-	//jsonToDomainNameSend["appType"] = "NEXGEN_EXPENZING_TNE_APP";
   	//var res=JSON.stringify(jsonToDomainNameSend);
 	var requestPath = WebServicePath;
 	j.ajax({
@@ -156,9 +125,9 @@ function commanLogin(){
  			}else{
  				successMessage = data.message;
  				if(successMessage == "" || successMessage == null){
-                alert(window.lang.translate('Please enter correct username or password'));		
+				alert("Please enter correct username or password");				
 				}else{
-                alert(window.lang.translate(successMessage));
+ 				alert(successMessage);	
  				}	
  			}
 		},
@@ -178,6 +147,7 @@ function commanLogin(){
 			});
       appPageHistory.push(pageRef);
 	 }
+
 
 	 function displayBusinessExp(){
 		 
@@ -236,8 +206,9 @@ function commanLogin(){
 			headerBackBtn=defaultPagePath+'categoryMsgPage.html';
 		}else{
 			headerBackBtn=defaultPagePath+'expenzingImagePage.html';
-		    pgRef=defaultPagePath+'loginPage.html';
+		pgRef=defaultPagePath+'loginPage.html';
 		}
+
 	}else{
 		headerBackBtn=defaultPagePath+'expenzingImagePage.html';
 		pgRef=defaultPagePath+'loginPage.html';
@@ -296,13 +267,14 @@ function isJsonString(str) {
 				
  
 function viewBusinessExp(){
-   var pageRef=defaultPagePath+'fairClaimTable.html';
-   //var headerBackBtn=defaultPagePath+'headerPageForBEOperation.html';
+    var pageRef=defaultPagePath+'fairClaimTable.html';
+    var headerBackBtn=defaultPagePath+'headerPageForBEOperation.html';
 	j(document).ready(function() {	
-		//j('#mainHeader').load(headerBackBtn);
+		j('#mainHeader').load(headerBackBtn);
 		j('#mainContainer').load(pageRef);
 	});
     appPageHistory.push(pageRef);
+    resetImageData();
     j('#loading_Cat').hide();
 }
 
@@ -327,8 +299,7 @@ function saveBusinessExpDetails(jsonBEArr,busExpDetailsArr){
 	 jsonToSaveBE["ProcessStatus"] = "0";
 	 jsonToSaveBE["expenseDetails"] = jsonBEArr;
 	 requestRunning = true;
-	 var pageRefSuccess=defaultPagePath+'success.html';
-     var pageRefFailure=defaultPagePath+'failure.html';
+	 var pageRef=defaultPagePath+'success.html';
 	 j('#loading_Cat').show();
 	 j.ajax({
 				  url: window.localStorage.getItem("urlPath")+"BusExpService",
@@ -345,25 +316,24 @@ function saveBusinessExpDetails(jsonBEArr,busExpDetailsArr){
 						 }
 						 requestRunning = false;
 						 j('#mainHeader').load(headerBackBtn);
-						 j('#mainContainer').load(pageRefSuccess);
+						 j('#mainContainer').load(pageRef);
 						 //appPageHistory.push(pageRef);
 					 }else if(data.Status=="Error"){
 					 	requestRunning = false;
 					 	successMessage = "Oops!! Something went wrong. Please contact system administrator";
 						j('#mainHeader').load(headerBackBtn);
-					 	j('#mainContainer').load(pageRefFailure);
+					 	j('#mainContainer').load(pageRef);
 					 }else{
 					 	requestRunning = false;
 					 	successMessage = "Error in synching expenses. Please contact system administrator";
 						j('#mainHeader').load(headerBackBtn);
-					 	j('#mainContainer').load(pageRefFailure);
+					 	j('#mainContainer').load(pageRef);
 					 } 
 				  },
 				  error:function(data) {
 					  j('#loading_Cat').hide();
 					  requestRunning = false;
-                    alert(window.lang.translate('Error: Oops something is wrong, Please Contact System Administer'));	
-                      
+					alert("error: Oops something is wrong, Please Contact System Administer");
 				  }
 			});
 }
@@ -374,8 +344,7 @@ function saveTravelSettleExpDetails(jsonTSArr,tsExpDetailsArr){
 	 jsonToSaveTS["employeeId"] = window.localStorage.getItem("EmployeeId");
 	 jsonToSaveTS["expenseDetails"] = jsonTSArr;
 	 requestRunning = true;
-     var pageRefSuccess=defaultPagePath+'success.html';
-     var pageRefFailure=defaultPagePath+'failure.html';
+	 var pageRef=defaultPagePath+'success.html';
 	j.ajax({
 				  url: window.localStorage.getItem("urlPath")+"SyncSettlementExpensesWebService",
 				  type: 'POST',
@@ -391,22 +360,22 @@ function saveTravelSettleExpDetails(jsonTSArr,tsExpDetailsArr){
 					 }
 					 requestRunning = false;
 					 j('#mainHeader').load(headerBackBtn);
-					 j('#mainContainer').load(pageRefSuccess);
+					 j('#mainContainer').load(pageRef);
 					 }else if(data.Status=="Error"){
 					 	requestRunning = false;
 						successMessage = "Oops!! Something went wrong. Please contact system administrator.";
 						j('#mainHeader').load(headerBackBtn);
-					 	j('#mainContainer').load(pageRefFailure);
+					 	j('#mainContainer').load(pageRef);
 					 }else{
 					 	requestRunning = false;
 						successMessage = "Error in synching expenses. Please contact system administrator.";
 						j('#mainHeader').load(headerBackBtn);
-					 	j('#mainContainer').load(pageRefFailure);
+					 	j('#mainContainer').load(pageRef);
 					 }
 				  },
 				  error:function(data) {
 				  	requestRunning = false;
-                    alert(window.lang.translate('Error: Oops something is wrong, Please Contact System Administer'));
+					alert("Error: Oops something is wrong, Please Contact System Administer");
 				  }
 			});
 }
@@ -423,13 +392,12 @@ function sendForApprovalBusinessDetails(jsonBEArr,busExpDetailsArr,accountHeadID
 	 jsonToSaveBE["ProcessStatus"] = "1";
 	 jsonToSaveBE["title"]= window.localStorage.getItem("FirstName")+"/"+jsonToSaveBE["startDate"]+" to "+jsonToSaveBE["endDate"];
 	
-     var pageRefSuccess=defaultPagePath+'success.html';
-     var pageRefFailure=defaultPagePath+'failure.html';
-	 callSendForApprovalServiceForBE(jsonToSaveBE,busExpDetailsArr,pageRefSuccess,pageRefFailure);
+	 var pageRef=defaultPagePath+'success.html';
+	 callSendForApprovalServiceForBE(jsonToSaveBE,busExpDetailsArr,pageRef);
 	 
 }
 
-function callSendForApprovalServiceForBE(jsonToSaveBE,busExpDetailsArr,pageRefSuccess,pageRefFailure){
+function callSendForApprovalServiceForBE(jsonToSaveBE,busExpDetailsArr,pageRef){
 j('#loading_Cat').show();
 var headerBackBtn=defaultPagePath+'backbtnPage.html';
 j.ajax({
@@ -452,7 +420,7 @@ j.ajax({
 						 requestRunning = false;
 						 j('#loading_Cat').hide();
 						 j('#mainHeader').load(headerBackBtn);
-						 j('#mainContainer').load(pageRefSuccess);
+						 j('#mainContainer').load(pageRef);
 						// appPageHistory.push(pageRef);
 						}
 					}else if(data.Status=="Failure"){
@@ -460,18 +428,18 @@ j.ajax({
 						requestRunning = false;
 					 	j('#loading_Cat').hide();
 						j('#mainHeader').load(headerBackBtn);
-					 	j('#mainContainer').load(pageRefFailure);
+					 	j('#mainContainer').load(pageRef);
 					 }else{
 						 j('#loading_Cat').hide();
 						successMessage = "Oops!! Something went wrong. Please contact system administrator.";
 						j('#mainHeader').load(headerBackBtn);
-					 	j('#mainContainer').load(pageRefFailure);
+					 	j('#mainContainer').load(pageRef);
 					 }
 					},
 				  error:function(data) {
 					j('#loading_Cat').hide();
 					requestRunning = false;
-                    alert(window.lang.translate('Error: Oops something is wrong, Please Contact System Administer'));
+					alert("Error: Oops something is wrong, Please Contact System Administer");
 				  }
 			});
 }
@@ -495,6 +463,7 @@ function createAccHeadDropDown(jsonAccHeadArr){
 			})
 			j("#accountHead").select2({
 				data:{ results: jsonArr, text: 'name' },
+				placeholder: "Account Head",
 				minimumResultsForSearch: -1,
 				initSelection: function (element, callback) {
 					callback(jsonArr[1]);
@@ -519,6 +488,7 @@ function createTRAccHeadDropDown(jsonAccHeadArr){
 	}
 	j("#trAccountHead").select2({
 		data:{ results: jsonArr, text: 'name' },
+		placeholder: "Select Account Head",
 		minimumResultsForSearch: -1,
 		formatResult: function(result) {
 			if ( ! isJsonString(result.id))
@@ -549,6 +519,7 @@ function createExpNameDropDown(jsonExpNameArr){
 	
 	j("#expenseName").select2({
 		data:{ results: jsonExpArr, text: 'name' },
+		placeholder: "Expense Name",
 		minimumResultsForSearch: -1,
 		initSelection: function (element, callback) {
 			callback(jsonExpArr[0]);
@@ -587,6 +558,33 @@ function createCurrencyDropDown(jsonCurrencyArr){
 	}).select2("val",jsonArr[0]);
 } 
 
+
+function createLocationDropDown(jsonLocationArr){
+	var jsonArr = [];
+	if(jsonLocationArr != null && jsonLocationArr.length > 0){
+		for(var i=0; i<jsonLocationArr.length; i++ ){
+			var stateArr = new Array();
+			stateArr = jsonLocationArr[i];
+			
+			jsonArr.push({id: stateArr.Label,name: stateArr.Value});
+		}
+	}
+		
+	j("#location").select2({
+		data:{ results: jsonArr, text: 'name' },
+		placeholder: "Location",
+		minimumResultsForSearch: -1,
+		initSelection: function (element, callback) {
+					callback(jsonArr[0]);
+		},
+		formatResult: function(result) {
+			if ( ! isJsonString(result.id))
+				result.id = JSON.stringify(result.id);
+				return result.name;
+		}
+	});
+} 
+
 function createTravelModeDown(jsonTrvlModeArr){
 	var jsonArr = [];
 	if(jsonTrvlModeArr != null && jsonTrvlModeArr.length > 0){
@@ -600,6 +598,7 @@ function createTravelModeDown(jsonTrvlModeArr){
 		
 	j("#travelMode").select2({
 		data:{ results: jsonArr, text: 'name' },
+		placeholder: "Travel Mode",
 		minimumResultsForSearch: -1,
 		formatResult: function(result) {
 			if ( ! isJsonString(result.id))
@@ -610,16 +609,7 @@ function createTravelModeDown(jsonTrvlModeArr){
 	
 	j("#roundTripMode").select2({
 		data:{ results: jsonArr, text: 'name' },
-		minimumResultsForSearch: -1,
-		formatResult: function(result) {
-			if ( ! isJsonString(result.id))
-				result.id = JSON.stringify(result.id);
-				return result.name;
-		}
-	});
-    
-    	j("#travelModeForTS").select2({
-		data:{ results: jsonArr, text: 'name' },
+		placeholder: "Travel Mode",
 		minimumResultsForSearch: -1,
 		formatResult: function(result) {
 			if ( ! isJsonString(result.id))
@@ -628,7 +618,6 @@ function createTravelModeDown(jsonTrvlModeArr){
 		}
 	});
 } 
-
 
 function createCategoryDropDown(jsonCategoryArr){
 	var jsonArr = [];
@@ -642,6 +631,7 @@ function createCategoryDropDown(jsonCategoryArr){
 		
 	j("#travelCategory").select2({
 		data:{ results: jsonArr, text: 'name' },
+		placeholder: "Travel Category",
 		minimumResultsForSearch: -1,
 		formatResult: function(result) {
 			if ( ! isJsonString(result.id))
@@ -652,6 +642,7 @@ function createCategoryDropDown(jsonCategoryArr){
 	
 	j("#roundTripCategory").select2({
 		data:{ results: jsonArr, text: 'name' },
+		placeholder: "Travel Category",
 		minimumResultsForSearch: -1,
 		formatResult: function(result) {
 			if ( ! isJsonString(result.id))
@@ -659,18 +650,7 @@ function createCategoryDropDown(jsonCategoryArr){
 				return result.name;
 		}
 	});
-    
-    	j("#travelCategoryForTS").select2({
-		data:{ results: jsonArr, text: 'name' },
-		minimumResultsForSearch: -1,
-		formatResult: function(result) {
-			if ( ! isJsonString(result.id))
-				result.id = JSON.stringify(result.id);
-				return result.name;
-		}
-	});
-}
-
+} 
 
 function createCitytownDropDown(jsonCityTownArr){
 	var jsonArr = [];
@@ -684,7 +664,8 @@ function createCitytownDropDown(jsonCityTownArr){
 		
 	j("#fromCitytown").select2({
 		data:{ results: jsonArr, text: 'name' },
-		minimumResultsForSearch: 2,
+		placeholder: "From Location",
+		//minimumResultsForSearch: -1,
 		formatResult: function(result) {
 			if ( ! isJsonString(result.id))
 				result.id = JSON.stringify(result.id);
@@ -694,18 +675,8 @@ function createCitytownDropDown(jsonCityTownArr){
 	
 	j("#toCitytown").select2({
 		data:{ results: jsonArr, text: 'name' },
-		minimumResultsForSearch: 2,
-		formatResult: function(result) {
-			if ( ! isJsonString(result.id))
-				result.id = JSON.stringify(result.id);
-				return result.name;
-		}
-	});
-    
-    
-    	j("#Citytown").select2({
-		data:{ results: jsonArr, text: 'name' },
-		minimumResultsForSearch: 2,
+		placeholder: "To Location",
+		//minimumResultsForSearch: -1,
 		formatResult: function(result) {
 			if ( ! isJsonString(result.id))
 				result.id = JSON.stringify(result.id);
@@ -713,7 +684,6 @@ function createCitytownDropDown(jsonCityTownArr){
 		}
 	});
 } 
-
 
 function createTravelTypeDropDown(jsonTravelTypeArr){
 	var jsonArr = [];
@@ -727,6 +697,7 @@ function createTravelTypeDropDown(jsonTravelTypeArr){
 		
 	j("#travelType").select2({
 		data:{ results: jsonArr, text: 'name' },
+		placeholder: "Purpose Of Travel",
 		minimumResultsForSearch: -1,
 		formatResult: function(result) {
 			if ( ! isJsonString(result.id))
@@ -745,17 +716,17 @@ function getFormattedDate(input){
    
 }
 
-function validateExpenseDetails(exp_date,exp_from_loc,exp_to_loc,exp_narration,exp_unit,exp_amt,acc_head_id,exp_name_id,currency_id){
+function validateExpenseDetails(exp_date,exp_from_loc,exp_to_loc,exp_narration,exp_unit,exp_amt,acc_head_id,exp_name_id,currency_id,location_id){
 	if(exp_date == ""){
-        alert(window.lang.translate('Expense Date is invalid'));
+		alert("Expense Date is invalid");
 		return false;
 	}
 	if(acc_head_id == "-1"){
-        alert(window.lang.translate('Account Head is invalid'));
+		alert("Account Head is invalid");
 		return false;
 	}
 	if(exp_name_id == "-1"){
-        alert(window.lang.translate('Expense Name is invalid'));
+		alert("Expense Name is invalid");
 		return false;
 	}
 	if(flagForUnitEnable == true){
@@ -770,17 +741,17 @@ function validateExpenseDetails(exp_date,exp_from_loc,exp_to_loc,exp_narration,e
 	}
 	if(perUnitDetailsJSON.expenseIsfromAndToReqd!='N'){
 		if(exp_from_loc == ""){
-            alert(window.lang.translate('From Location is invalid'));
+			alert("From Location is invalid");
 			return false;
 		}
 		if(exp_to_loc == ""){
-            alert(window.lang.translate('To Location is invalid'));
+			alert("To Location is invalid");
 			return false;
 		}
 	}
 
 	if(exp_narration == ""){
-        alert(window.lang.translate('Narration is invalid'));
+		alert("Narration is invalid");
 		return false;
 	}
 	
@@ -793,7 +764,7 @@ function validateExpenseDetails(exp_date,exp_from_loc,exp_to_loc,exp_narration,e
 			}
 			
 		}else{
-            alert(window.lang.translate('Unit is invalid'));
+			alert("Unit is invalid");
 			return false;
 		}
 	}
@@ -806,12 +777,17 @@ function validateExpenseDetails(exp_date,exp_from_loc,exp_to_loc,exp_narration,e
 			}
 			
 		}else{
-            alert(window.lang.translate('Amount is invalid'));
+			alert("Amount is invalid");
 			return false;
 		}
 	
 	if(currency_id == "-1"){
-        alert(window.lang.translate('Currency Name is invalid'));
+		alert("Currency Name is invalid");
+		return false;
+	}
+    
+    	if(location_id == "-1"){
+		alert("Location Name is invalid");
 		return false;
 	}
 	
@@ -986,8 +962,7 @@ function syncSubmitTravelDetails(){
 }
 
 function saveTravelRequestAjax(jsonToSaveTR){
-	 var pageRefSuccess=defaultPagePath+'success.html';
-     var pageRefFailure=defaultPagePath+'failure.html';
+	var pageRef=defaultPagePath+'success.html';
     j('#loading_Cat').show();    
 	 j.ajax({
 			  url: window.localStorage.getItem("urlPath")+"SyncTravelRequestDetail",
@@ -1002,26 +977,25 @@ function saveTravelRequestAjax(jsonToSaveTR){
 							 
 						}
 					  successMessage = data.Message;
-                      //alert(window.lang.translate(successMessage));
-
+					  //alert(successMessage);
 					  
 				  }else if(data.Status=="Success"){
 					  successMessage = data.Message;
 						j('#loading_Cat').hide();
-						j('#mainContainer').load(pageRefSuccess);
-						appPageHistory.push(pageRefSuccess);
+						j('#mainContainer').load(pageRef);
+						appPageHistory.push(pageRef);
 				  }else{
 					 successMessage = "Error: Oops something is wrong, Please Contact System Administer";
 					  j('#loading_Cat').hide();
-					  j('#mainContainer').load(pageRefFailure);
-					   appPageHistory.push(pageRefFailure);
+					  j('#mainContainer').load(pageRef);
+					   appPageHistory.push(pageRef);
 				  }
 				},
 			  error:function(data) {
 				successMessage = "Error: Oops something is wrong, Please Contact System Administer";
 					  j('#loading_Cat').hide();
-					  j('#mainContainer').load(pageRefFailure);
-					  appPageHistory.push(pageRefFailure);
+					  j('#mainContainer').load(pageRef);
+					  appPageHistory.push(pageRef);
 			  }
 	});
 }
@@ -1166,54 +1140,54 @@ function setBooleanValueHotelRoundTextField(){
 }
 function validatetravelDetails(travel_purpose_id,account_head_id,from_id,to_id,travel_mode_id,travel_category_id,tvl_mode_rnd_id,tvl_category_rnd_id,tvl_date,travel_title){
 	if(travel_title==""){
-        alert(window.lang.translate('Travel Title is required'));
+		alert("Travel Title is required");
 		return false;
 	}
 	if(travel_purpose_id == "-1"){
-         alert(window.lang.translate('Purpose Of Travel is invalid'));
+		alert("Purpose Of Travel is invalid");
 		return false;
 	}
 	if(account_head_id == "-1"){
-        alert(window.lang.translate('Account Head is invalid'));
+		alert("Account Head is invalid");
 		return false;
 	}
 	if(from_id == "-1"){
-        alert(window.lang.translate('From Location is invalid'));
+		alert("From Location is invalid");
 		return false;
 	}
 	if(to_id == "-1"){
-		alert(window.lang.translate('To Location is invalid'));
+		alert("To Location is invalid");
 		return false;
 	}
 	var listItineraryTab = document.getElementById('myTab');
 			if(hasClass(listItineraryTab.children[0],"active")){
 				if(travel_mode_id == "-1"){
-                    alert(window.lang.translate('Mode is invalid'));
+					alert("Mode is invalid");
 					return false;
 				}
 				if(travel_category_id == "-1"){
-                    alert(window.lang.translate('Category is invalid'));
+					alert("Category is invalid");
 					return false;
 				}
 				if(document.getElementById('selectDate_One').value == "Select Date"){
-                    alert(window.lang.translate('Travel Date is invalid'));
+					alert("Travel Date is invalid");
 					return false;
 				}
 			}else{
 				if(tvl_mode_rnd_id == "-1"){
-                    alert(window.lang.translate('Mode is invalid'));
+					alert("Mode is invalid");
 					return false;
 				}
 				if(tvl_category_rnd_id == "-1"){
-                    alert(window.lang.translate('Category is invalid'));
+					alert("Category is invalid");
 					return false;
 				}
 				if(document.getElementById('selectDate_Three').value == "Select Date"){
-                    alert(window.lang.translate('Travel Date is invalid'));
+					alert("Travel Date is invalid");
 					return false;
 				}
 				if(document.getElementById('selectDate_Two').value == "Select Date"){
-                  alert(window.lang.translate('Travel Date is invalid'));
+					alert("Travel Date is invalid");
 					return false;
 				}
 		} 	
@@ -1289,115 +1263,107 @@ function onloadTimePicker(){
      getCategoryFromDB(modeID);
  }
 
-  function getCatergoryBasedOnModeForTS(){
-
- 	var modeID = j("#travelModeForTS").select2('data').id;
-     getCategoryFromDB(modeID);
- }
-
   function getRoundCatergoryBasedOnMode(){
 
 	 	var modeID = j("#roundTripMode").select2('data').id;
 	     getCategoryFromDB(modeID);
 	 }
 
-
 function setPerUnitDetails(transaction, results){
- 		 
-	if(results!=null){
-		    var row = results.rows.item(0);
-		    perUnitDetailsJSON["expenseIsfromAndToReqd"]=row.expIsFromToReq;
-		    perUnitDetailsJSON["isUnitReqd"]=row.expIsUnitReq;
-		    perUnitDetailsJSON["expRatePerUnit"]=row.expRatePerUnit;
-		    perUnitDetailsJSON["expFixedOrVariable"]=row.expFixedOrVariable;
-		    perUnitDetailsJSON["expFixedLimitAmt"]=row.expFixedLimitAmt;
-		    perUnitDetailsJSON["expenseName"]=row.expName;
-			perUnitDetailsJSON["expPerUnitActiveInative"]=row.expPerUnitActiveInative;
-			perUnitDetailsJSON["isErReqd"]=row.isErReqd;
-			perUnitDetailsJSON["limitAmountForER"]=row.limitAmountForER;
-		    document.getElementById("ratePerUnit").value = row.expRatePerUnit;
-		    document.getElementById("expAmt").value="";
-		    document.getElementById("expUnit").value="";
-			document.getElementById("expFromLoc").value = "";
-			document.getElementById("expToLoc").value = "";
-			document.getElementById("expNarration").value = "";
-			document.getElementById("expUnit").value = "";
-			document.getElementById("expAmt").value = "";
-		    if(perUnitDetailsJSON.expenseIsfromAndToReqd=='N'){
-				document.getElementById("expFromLoc").value="";
-				document.getElementById("expToLoc").value="";
-				document.getElementById("expFromLoc").disabled =true;
-				document.getElementById("expToLoc").disabled =true;
-				document.getElementById("expFromLoc").style.backgroundColor='#d1d1d1'; 
-				document.getElementById("expToLoc").style.backgroundColor='#d1d1d1';
-				document.getElementById("expNarration").disabled =false;
-				document.getElementById("expNarration").style.backgroundColor='#FFFFFF';
-				document.getElementById("mapImage").style.display= "none";
-			}else{
-				document.getElementById("expFromLoc").disabled =false;
-				document.getElementById("expToLoc").disabled =false;
-				document.getElementById("expFromLoc").value="";
-				document.getElementById("expToLoc").value="";
-				document.getElementById("expNarration").value="";
-				document.getElementById("expFromLoc").style.backgroundColor='#FFFFFF'; 
-				document.getElementById("expToLoc").style.backgroundColor='#FFFFFF'; 
-				//alert(window.localStorage.getItem("MobileMapRole"))
-				if(window.localStorage.getItem("MobileMapRole") == 'true') 
-				{
-					attachGoogleSearchBox(document.getElementById("expFromLoc"));
-					attachGoogleSearchBox(document.getElementById("expToLoc"));
-					document.getElementById("mapImage").style.display="";
-					document.getElementById("expNarration").disabled =true;
-					document.getElementById("expNarration").style.backgroundColor='#d1d1d1';
-				} 
-			}
-			if(perUnitDetailsJSON.isUnitReqd=='Y'){
-				document.getElementById("expAmt").value="";
-				if(perUnitDetailsJSON.expFixedOrVariable=='V'){
-					flagForUnitEnable = true;
-					if(perUnitDetailsJSON.expenseIsfromAndToReqd=='Y' && window.localStorage.getItem("MobileMapRole") == 'true'){
-						document.getElementById("expUnit").disabled =true;
-						document.getElementById("expUnit").style.backgroundColor='#d1d1d1';
-					}
-					else{
-						document.getElementById("expUnit").disabled =false;
-						document.getElementById("expUnit").style.backgroundColor='#FFFFFF';
-					}
-					document.getElementById("expAmt").disabled =false;
-					document.getElementById("expAmt").style.backgroundColor='#FFFFFF';
-				}else{
-					flagForUnitEnable = true;
-					if(perUnitDetailsJSON.expenseIsfromAndToReqd=='Y' && window.localStorage.getItem("MobileMapRole") == 'true'){
-						document.getElementById("expUnit").disabled =true;
-						document.getElementById("expUnit").style.backgroundColor='#d1d1d1';
-					}
-					else{
-						document.getElementById("expUnit").disabled =false;
-						document.getElementById("expUnit").style.backgroundColor='#FFFFFF';
-					}
-					document.getElementById("expAmt").disabled =true;
-					document.getElementById("expAmt").style.backgroundColor='#d1d1d1'; 
+	
+ 	if(results!=null){
+		var row = results.rows.item(0);
+		perUnitDetailsJSON["expenseIsfromAndToReqd"]=row.expIsFromToReq;
+		perUnitDetailsJSON["isUnitReqd"]=row.expIsUnitReq;
+		perUnitDetailsJSON["expRatePerUnit"]=row.expRatePerUnit;
+		perUnitDetailsJSON["expFixedOrVariable"]=row.expFixedOrVariable;
+		perUnitDetailsJSON["expFixedLimitAmt"]=row.expFixedLimitAmt;
+		perUnitDetailsJSON["expenseName"]=row.expName;
+		perUnitDetailsJSON["expPerUnitActiveInative"]=row.expPerUnitActiveInative;
+		perUnitDetailsJSON["isErReqd"]=row.isErReqd;
+		perUnitDetailsJSON["limitAmountForER"]=row.limitAmountForER;
+		document.getElementById("ratePerUnit").value = row.expRatePerUnit;
+		document.getElementById("expAmt").value="";
+		document.getElementById("expUnit").value="";
+		document.getElementById("expFromLoc").value = "";
+		document.getElementById("expToLoc").value = "";
+		document.getElementById("expNarration").value = "";
+		document.getElementById("expUnit").value = "";
+		document.getElementById("expAmt").value = "";
+		if(perUnitDetailsJSON.expenseIsfromAndToReqd=='N'){
+			document.getElementById("expFromLoc").value="";
+			document.getElementById("expToLoc").value="";
+			document.getElementById("expFromLoc").disabled =true;
+			document.getElementById("expToLoc").disabled =true;
+			document.getElementById("expFromLoc").style.backgroundColor='#d1d1d1'; 
+			document.getElementById("expToLoc").style.backgroundColor='#d1d1d1';
+			document.getElementById("expNarration").disabled =false;
+			document.getElementById("expNarration").style.backgroundColor='#FFFFFF';
+			document.getElementById("mapImage").style.display= "none";
+		}else{
+			document.getElementById("expFromLoc").disabled =false;
+			document.getElementById("expToLoc").disabled =false;
+			document.getElementById("expFromLoc").value="";
+			document.getElementById("expToLoc").value="";
+			document.getElementById("expNarration").value="";
+			document.getElementById("expFromLoc").style.backgroundColor='#FFFFFF'; 
+			document.getElementById("expToLoc").style.backgroundColor='#FFFFFF'; 
+			//alert(window.localStorage.getItem("MobileMapRole"))
+			if(window.localStorage.getItem("MobileMapRole") == 'true') 
+			{
+				attachGoogleSearchBox(document.getElementById("expFromLoc"));
+				attachGoogleSearchBox(document.getElementById("expToLoc"));
+				document.getElementById("mapImage").style.display="";
+				document.getElementById("expNarration").disabled =true;
+				document.getElementById("expNarration").style.backgroundColor='#d1d1d1';
+			} 
+		}
+		if(perUnitDetailsJSON.isUnitReqd=='Y'){
+			document.getElementById("expAmt").value="";
+			if(perUnitDetailsJSON.expFixedOrVariable=='V'){
+				flagForUnitEnable = true;
+				if(perUnitDetailsJSON.expenseIsfromAndToReqd=='Y' && window.localStorage.getItem("MobileMapRole") == 'true'){
+					document.getElementById("expUnit").disabled =true;
+					document.getElementById("expUnit").style.backgroundColor='#d1d1d1';
 				}
+				else{
+					document.getElementById("expUnit").disabled =false;
+					document.getElementById("expUnit").style.backgroundColor='#FFFFFF';
+				}
+				document.getElementById("expAmt").disabled =false;
+				document.getElementById("expAmt").style.backgroundColor='#FFFFFF';
 			}else{
-				flagForUnitEnable = false;
-				document.getElementById("expUnit").disabled =true;
-				document.getElementById("expUnit").style.backgroundColor='#d1d1d1'; 
-				document.getElementById("expAmt").disabled =false;
-				document.getElementById("expAmt").style.backgroundColor='#FFFFFF'; 
-			}
-			if(perUnitDetailsJSON.expPerUnitActiveInative=='1'){
-				flagForUnitEnable=false;
-				document.getElementById("expUnit").disabled =true;
-				document.getElementById("expAmt").disabled =false;
-				document.getElementById("expAmt").style.backgroundColor='#FFFFFF'; 
-				document.getElementById("expUnit").style.backgroundColor='#d1d1d1';
+				flagForUnitEnable = true;
+				if(perUnitDetailsJSON.expenseIsfromAndToReqd=='Y' && window.localStorage.getItem("MobileMapRole") == 'true'){
+					document.getElementById("expUnit").disabled =true;
+					document.getElementById("expUnit").style.backgroundColor='#d1d1d1';
+				}
+				else{
+					document.getElementById("expUnit").disabled =false;
+					document.getElementById("expUnit").style.backgroundColor='#FFFFFF';
+				}
+				document.getElementById("expAmt").disabled =true;
+				document.getElementById("expAmt").style.backgroundColor='#d1d1d1'; 
 			}
 		}else{
-
-			alert("Please Synch your expense Names to claim expense.");
+			flagForUnitEnable = false;
+			document.getElementById("expUnit").disabled =true;
+			document.getElementById("expUnit").style.backgroundColor='#d1d1d1'; 
+			document.getElementById("expAmt").disabled =false;
+			document.getElementById("expAmt").style.backgroundColor='#FFFFFF'; 
 		}
-	
-}
+		if(perUnitDetailsJSON.expPerUnitActiveInative=='1'){
+			flagForUnitEnable=false;
+			document.getElementById("expUnit").disabled =true;
+			document.getElementById("expAmt").disabled =false;
+			document.getElementById("expAmt").style.backgroundColor='#FFFFFF'; 
+			document.getElementById("expUnit").style.backgroundColor='#d1d1d1';
+		}
+	}else{
+		alert("Please Synch your expense Names to claim expense.");
+	}
+ }
+
 
  	function setModeCategroyDetails(transaction, results){
  	
@@ -1407,13 +1373,13 @@ function setPerUnitDetails(transaction, results){
 		        ismodeCategoryJSON["expenseNameId"]=row.expenseNameId;
 		        ismodeCategoryJSON["isModeCategory"]=row.isModeCategory;
 		      if(ismodeCategoryJSON.isModeCategory=='N'){
-					  j('#travelModeForTS').select2('data', '');
-					  j('#travelCategoryForTS').select2('data', '');
-					  j('#travelModeForTS').select2('disable');
-					  j('#travelCategoryForTS').select2('disable');
+					  j('#travelMode').select2('data', '');
+					  j('#travelCategory').select2('data', '');
+					  j('#travelMode').select2('disable');
+					  j('#travelCategory').select2('disable');
 				}else{
-					  j('#travelModeForTS').select2('enable');
-					  j('#travelCategoryForTS').select2('enable');
+					  j('#travelMode').select2('enable');
+					  j('#travelCategory').select2('enable');
 				}
 		}else{
 
@@ -1423,6 +1389,7 @@ function setPerUnitDetails(transaction, results){
  	}
 
  	function checkPerUnitExceptionStatusForBEAtLineLevel(){
+ 		
  		exceptionStatus="N";
  		exceptionMessage='';
  		//String acExpNameReqStatus = findByIdAccountCodeExpenseNameRequiredStatus(accountCodeId);
@@ -1493,26 +1460,6 @@ function calculatePerUnit(){
 
 }
 
-function checkAmount(){
-		 
-		 var amount=document.getElementById("expAmt").value;
-		if(isOnlyNumeric(amount,"Amount")==false)
-		{	
-			document.getElementById("expAmt").value="";
-			return false;
-		}
-}
-
-function checkEnterAmount(){
-		 
-		 var amount=document.getElementById("empAdvAmount").value;
-		if(isOnlyNumeric(amount,"Amount")==false)
-		{	
-			document.getElementById("empAdvAmount").value="";
-			return false;
-		}
-}
-
 function validateNumericField(obj){
 	
 	if(document.getElementById("expAmt").value)
@@ -1533,8 +1480,7 @@ function validateNumericField(obj){
 }
 
 function setDelayMessage(returnJsonData,jsonToBeSend,busExpDetailsArr){
-     var pageRefSuccess=defaultPagePath+'success.html';
-     var pageRefFailure=defaultPagePath+'failure.html';
+		var pageRef=defaultPagePath+'success.html';
 		if(returnJsonData.DelayStatus=='Y'){
 			exceptionMessage = "This voucher has exceeded Time Limit.";
 			
@@ -1543,15 +1489,16 @@ function setDelayMessage(returnJsonData,jsonToBeSend,busExpDetailsArr){
 		    
 		}else{
 
-			if(confirm(window.lang.translate("This voucher has exceeded Time Limit. Do you want to proceed?"))==false){
+			if(confirm("This voucher has exceeded Time Limit. Do you want to proceed?")==false){
 						return false;
 					}
 			 jsonToBeSend["DelayAllowCheck"]=true;
-			 callSendForApprovalServiceForBE(jsonToBeSend,busExpDetailsArr,pageRefSuccess,pageRefFailure);
+			 callSendForApprovalServiceForBE(jsonToBeSend,busExpDetailsArr,pageRef);
 		}			
 }
 
 function setTREntitlementExceedMessage(returnJsonData,jsonToBeSend){
+		var pageRef=defaultPagePath+'success.html';
 		var msg=returnJsonData.Message+".\nThis voucher has exceeded Entitlements. Do you want to proceed?";
 	navigator.notification.confirm(msg,
 		function(buttonIndex){
@@ -1596,6 +1543,7 @@ function createTravelExpenseNameDropDown(jsonExpenseNameArr){
 		
 	j("#travelExpenseName").select2({
 		data:{ results: jsonExpArr, text: 'name' },
+		placeholder: "Expense Name",
 		minimumResultsForSearch: -1,
 		formatResult: function(result) {
 			if ( ! isJsonString(result.id))
@@ -1609,33 +1557,33 @@ function createTravelExpenseNameDropDown(jsonExpenseNameArr){
 function validateTSDetails(exp_date,exp_narration,exp_unit,exp_amt,travelRequestId,exp_name_id,currency_id,travelMode_id,travelCategory_id,cityTown_id){
 	
 	if(travelRequestId == "-1"){
-        alert(window.lang.translate('Travel Request Number is invalid.'));
+		alert("Travel Request Number is invalid.");
 		return false;
 	}
 	if(exp_date == ""){
-    alert(window.lang.translate('Expense Date is invalid.'));
+		alert("Expense Date is invalid.");
 		return false;
 	}
 	if(exp_name_id == "-1"){
-        alert(window.lang.translate('Expense Name is invalid.'));
+		alert("Expense Name is invalid.");
 		return false;
 	}
 	if(ismodeCategoryJSON.isModeCategory=="Y"){
 		if(travelMode_id == "-1"){
-             alert(window.lang.translate('Mode is invalid.'));
+			alert("Mode is invalid.");
 			return false;
 		}
 		if(travelCategory_id == "-1"){
-             alert(window.lang.translate('Category is invalid.'));
+			alert("Category is invalid.");
 			return false;
 		}
 	}
 	if(cityTown_id == "-1"){
-        alert(window.lang.translate('City town details is invalid.'));
+		alert("City town details is invalid.");
 		return false;
 	}
 	if(exp_narration == ""){
-         alert(window.lang.translate('Narration is invalid.'));
+		alert("Narration is invalid.");
 		return false;
 	}
 	if(exp_unit != ""){
@@ -1649,7 +1597,7 @@ function validateTSDetails(exp_date,exp_narration,exp_unit,exp_amt,travelRequest
 				return false;
 			}
 		}else{
-            alert(window.lang.translate('Unit is invalid.'));
+			alert("Unit is invalid.");
 			return false;
 		}
 	if(exp_amt != ""){
@@ -1663,11 +1611,11 @@ function validateTSDetails(exp_date,exp_narration,exp_unit,exp_amt,travelRequest
 				return false;
 			}
 		}else{
-            alert(window.lang.translate('Amount is invalid.'));
+			alert("Amount is invalid.");
 			return false;
 		}
 	if(currency_id == "-1"){
-        alert(window.lang.translate('Currency Name is invalid.'));
+		alert("Currency Name is invalid.");
 		return false;
 	}
 	return true;
@@ -1688,6 +1636,7 @@ function createTravelRequestNoDropDown(jsonTravelRequestNoArr){
 		
 	j("#travelRequestName").select2({
 		data:{ results: jsonRequestArr, text: 'name' },
+		placeholder: "Travel Request Number",
 		minimumResultsForSearch: -1,
 		formatResult: function(result) {
 			if ( ! isJsonString(result.id))
@@ -1711,8 +1660,8 @@ function oprationOnExpenseClaim(){
 														  
 						  });
 					  }else{
-alert(window.lang.translate('Tap and select Expenses to send for Approval with server.'));
-             }
+						 alert("Tap and select Expenses to send for Approval with server.");
+					  }
 			});
         }else{  
 		       j('#send').on('click', function(e){ 
@@ -1784,7 +1733,7 @@ alert(window.lang.translate('Tap and select Expenses to send for Approval with s
 								
 								  jsonFindBE["amount"] = j(this).find('td.expAmt1').text();
 								  jsonFindBE["currencyId"] = j(this).find('td.currencyId').text();
-
+                                  jsonFindBE["locationId"] = j(this).find('td.locationId').text();
 								  var dataURL =  j(this).find('td.busAttachment').text();
 
 								  //For IOS image save
@@ -1806,7 +1755,7 @@ alert(window.lang.translate('Tap and select Expenses to send for Approval with s
 						  	 sendForApprovalBusinessDetails(jsonExpenseDetailsArr,busExpDetailsArr,accountHeadIdToBeSent);
 						  }
 					  }else{
-                          alert(window.lang.translate('Tap and select Expenses to send for Approval with server.'));
+						 alert("Tap and select Expenses to send for Approval with server.");
 					  }
 			});
         }
@@ -1831,7 +1780,7 @@ alert(window.lang.translate('Tap and select Expenses to send for Approval with s
 					  }
 					  j('#mainContainer').load(pageRef);
 				  }else{
-                      alert(window.lang.translate('Tap and select Expenses to delete.'));
+					  alert("Tap and select Expenses to delete.");
 				  }
 			});
 		
@@ -1883,7 +1832,7 @@ alert(window.lang.translate('Tap and select Expenses to send for Approval with s
 						  saveBusinessExpDetails(jsonExpenseDetailsArr,busExpDetailsArr);
 					  }
 				  }else{
-                      alert(window.lang.translate('Tap and select Expenses to synch with server.'));
+					 alert("Tap and select Expenses to synch with server.");
 				  }
 			});
 	
@@ -1940,7 +1889,7 @@ function oprationONTravelSettlementExp(){
 				  }
 			}else{
 				requestRunning = false;
-				alert(window.lang.translate('Tap and select Expenses to synch with server.'));
+				 alert("Tap and select Expenses to synch with server.");
 			}
 			});
 			
@@ -1962,7 +1911,7 @@ function oprationONTravelSettlementExp(){
 					  j('#mainContainer').load(pageRef);
 					  j('#mainHeader').load(headerBackBtn);	
 				  }else{
-					 alert(window.lang.translate('Tap and select Expenses to delete.'));
+					 alert("Tap and select Expenses to delete.");
 				  }	
 			});
 	}
@@ -2131,7 +2080,7 @@ function oprationOnWallet(){
 						  saveWalletDetails(jsonWalletArr,jsonWalletIDArr);
 						}
 					}else{
-                         alert(window.lang.translate('Tap and select My Receipts Wallet to synch with server.'));
+					   alert("Tap and select My Receipts Wallet to synch with server.");
 					  }
 					});
 			}		
@@ -2147,10 +2096,8 @@ function hideTRIcons(){
 function hideTRMenus(){
 	if(window.localStorage.getItem("TrRole") == "true"){
 		document.getElementById('TrRoleID').style.display="block";
-        document.getElementById('TsRoleID').style.display="block";
 	}else{
 		document.getElementById('TrRoleID').style.display="none";
-        document.getElementById('TsRoleID').style.display="none";
 	}
 }
 function validateValidMobileUser(){
@@ -2169,14 +2116,8 @@ function validateValidMobileUser(){
 	         data: JSON.stringify(jsonToBeSend),
 	         success: function(data) {
 	         	
-	         if(data.Status == 'Success'){
-              window.lang.change(window.localStorage.getItem("localLanguage"));
-	          setUserStatusInLocalStorage("Valid");	 
-			/*if(!data.MobileMapRole){
-					window.localStorage.removeItem("MobileMapRole");
-				}else{
-					window.localStorage.setItem("MobileMapRole",data.MobileMapRole);
-				} */
+	         	 if(data.Status == 'Success'){
+	         	 	setUserStatusInLocalStorage("Valid");
 	           }else if(data.Status == 'NoAndroidRole'){
 	         	 	successMessage = data.Message;
 	         	 	headerBackBtn=defaultPagePath+'expenzingImagePage.html';
@@ -2209,7 +2150,9 @@ function validateValidMobileUser(){
 					j('#mainHeader').load(headerBackBtn);
              		j('#mainContainer').load(pgRef,function() {
   						document.getElementById("loginErrorMsg").innerHTML = successMessage;
-					   j('#loginErrorMsg').hide().fadeIn('slow').delay(4000).fadeOut('slow');
+  						document.getElementById("userNameLabel").innerHTML=window.localStorage.getItem("UserName");
+  						document.getElementById("userName").value=window.localStorage.getItem("UserName");
+		 			   j('#loginErrorMsg').hide().fadeIn('slow').delay(4000).fadeOut('slow');
 		 			   j('#loading').hide();
 					});
 	           }
@@ -2412,6 +2355,7 @@ function createAdvanceTypeDropDown(jsonAdvanceTypeArr){
 		
 	j("#empAdvType").select2({
 		data:{ results: jsonArr, text: 'name' },
+		placeholder: "Advance Type",
 		minimumResultsForSearch: -1,
 		formatResult: function(result) {
 			if ( ! isJsonString(result.id))
@@ -2443,6 +2387,7 @@ function createAccountHeadDropDown(jsonAccountHeadArr){
 		
 	j("#empAdvAccHead").select2({
 		data:{ results: jsonArr, text: 'name' },
+		placeholder: "Expense Type",
 		minimumResultsForSearch: -1,
 		formatResult: function(result) {
 			if ( ! isJsonString(result.id))
@@ -2485,7 +2430,7 @@ function syncSubmitEmpAdvance(){
 		empAccHead_id = j("#empAdvAccHead").select2('data').id;
 		empAccHead_Name = j("#empAdvAccHead").select2('data').name;
 	}else{
-		empAccHead_id = '-1';
+		from_id = '-1';
 	}	
 	
 
@@ -2513,8 +2458,7 @@ function syncSubmitEmpAdvance(){
 
 function saveEmployeeAdvanceAjax(jsonToSaveEA){
     var headerBackBtn=defaultPagePath+'backbtnPage.html';
-     var pageRefSuccess=defaultPagePath+'success.html';
-     var pageRefFailure=defaultPagePath+'failure.html';
+	var pageRef=defaultPagePath+'success.html';
 	 j.ajax({
 			  url: window.localStorage.getItem("urlPath")+"SyncSubmitEmployeeAdvanceDetail",
 			  type: 'POST',
@@ -2527,25 +2471,25 @@ function saveEmployeeAdvanceAjax(jsonToSaveEA){
 						requestRunning = false;
 					 	j('#loading_Cat').hide();
 						j('#mainHeader').load(headerBackBtn);
-					 	j('#mainContainer').load(pageRefSuccess);
+					 	j('#mainContainer').load(pageRef);
 						
 					}else if(data.Status=="Failure"){
 					 	successMessage = data.Message;
 						requestRunning = false;
 					 	j('#loading_Cat').hide();
 						j('#mainHeader').load(headerBackBtn);
-					 	j('#mainContainer').load(pageRefFailure);
+					 	j('#mainContainer').load(pageRef);
 					 }else{
 						 j('#loading_Cat').hide();
 						successMessage = "Oops!! Something went wrong. Please contact system administrator.";
 						j('#mainHeader').load(headerBackBtn);
-					 	j('#mainContainer').load(pageRefFailure);
+					 	j('#mainContainer').load(pageRef);
 					 }
 					},
 				  error:function(data) {
 					j('#loading_Cat').hide();
 					requestRunning = false;
-                    alert(window.lang.translate('Error: Oops something is wrong, Please Contact System Administer'));
+					alert("Error: Oops something is wrong, Please Contact System Administer");
 				  }
 	});
 }
@@ -2553,19 +2497,19 @@ function saveEmployeeAdvanceAjax(jsonToSaveEA){
 function validateEmpAdvanceDetails(empAdvDate,empAdvTitle,empAdvjustification,empAdvAmount,empAdvType_id,empAdvType_Name,empAccHead_id,empAccHead_Name){
     
 	if(empAdvDate==""){
-        alert(window.lang.translate('Advance Date is required'));
+		alert("Advance Date is required");
 		return false;
 	}
 	if(empAdvTitle == ""){
-        alert(window.lang.translate('Advance Title is required'));
+		alert("Advance Title is required");
 		return false;
 	}
     if(empAdvjustification == ""){
-        alert(window.lang.translate('Justification is required'));
+		alert("justification is required");
 		return false;
 	}
      if(empAdvAmount == ""){
-        alert(window.lang.translate('Amount is required'));
+		alert("Amount is required");
 		return false;
 	}
     
@@ -2577,7 +2521,7 @@ function validateEmpAdvanceDetails(empAdvDate,empAdvTitle,empAdvjustification,em
         }
 			
 		}else{
-        alert(window.lang.translate('Amount is invalid'));	
+			alert("Amount is invalid");
 			return false;
 		}
     
@@ -2587,11 +2531,11 @@ function validateEmpAdvanceDetails(empAdvDate,empAdvTitle,empAdvjustification,em
 	}
     
 	if(empAdvType_id == "-1" || empAdvType_id == ""){
-        alert(window.lang.translate('Advance Type is invalid'));
+		alert("Advance Type is invalid");
 		return false;
 	}
 	if(empAccHead_id == "-1" || empAccHead_id == ""){
-        alert(window.lang.translate('Expense Type is invalid'));
+		alert("Expense Type is invalid");
 		return false;
 	}
 	
@@ -2599,8 +2543,8 @@ function validateEmpAdvanceDetails(empAdvDate,empAdvTitle,empAdvjustification,em
 }
 
 
-function displayEmpAdvanceExp(){
-    var headerBackBtn=defaultPagePath+'headerPageForBEOperation.html';
+function displayEmpAdvanceExp(){	 
+		 var headerBackBtn=defaultPagePath+'headerPageForBEOperation.html';
      var pageRef=defaultPagePath+'availableEmpAdvance.html';
 			j(document).ready(function() {
 				j('#mainHeader').load(headerBackBtn);
@@ -2611,7 +2555,7 @@ function displayEmpAdvanceExp(){
      
 function hideEAIcons(){
 	if(window.localStorage.getItem("EaInMobile") == "true"){
-		document.getElementById('CategoryEAId').style.display="block";
+		document.getElementById('CategoryEAId').style.display="block";		
 	}else{
 		document.getElementById('CategoryEAId').style.display="none";
 	}
@@ -2636,6 +2580,8 @@ function hideEmployeeAdvance(){
 		document.getElementById('EA').style.display="none";
 	}
 }
+
+
 
 function populateBEAmount(){
                         var BEAmount = 0;
@@ -2783,6 +2729,7 @@ function submitBEWithEA(){
 								
 								  jsonFindBE["amount"] = j(this).find('td.expAmt1').text();
 								  jsonFindBE["currencyId"] = j(this).find('td.currencyId').text();
+                                  jsonFindBE["location"] = j(this).find('td.location').text();
 
 								  var dataURL =  j(this).find('td.busAttachment').text();
 
@@ -2817,7 +2764,7 @@ function submitBEWithEA(){
 						  	 sendForApprovalBusinessDetailsWithEa(jsonExpenseDetailsArr,jsonEmplAdvanceArr,busExpDetailsArr,emplAdvanceDetailsArr,accountHeadIdToBeSent);
 						  }
 					  }else{
-                          alert(window.lang.translate('Tap and select Expenses to send for Approval with server.'));
+						 alert("Tap and select Expenses to send for Approval with server.");
                       }
     
 }
@@ -2850,13 +2797,12 @@ function sendForApprovalBusinessDetailsWithEa(jsonBEArr,jsonEAArr,busExpDetailsA
 	 jsonToSaveBE["ProcessStatus"] = "1";
 	 jsonToSaveBE["title"]= window.localStorage.getItem("FirstName")+"/"+jsonToSaveBE["startDate"]+" to "+jsonToSaveBE["endDate"];
 	
-     var pageRefSuccess=defaultPagePath+'success.html';
-     var pageRefFailure=defaultPagePath+'failure.html';
-	 callSendForApprovalServiceForBEwithEA(jsonToSaveBE,busExpDetailsArr,empAdvArr,pageRefSuccess,pageRefFailure);
+	 var pageRef=defaultPagePath+'success.html';
+	 callSendForApprovalServiceForBEwithEA(jsonToSaveBE,busExpDetailsArr,empAdvArr,pageRef);
 	 
 }
 
-function callSendForApprovalServiceForBEwithEA(jsonToSaveBE,busExpDetailsArr,empAdvArr,pageRefSuccess,pageRefFailure){
+function callSendForApprovalServiceForBEwithEA(jsonToSaveBE,busExpDetailsArr,empAdvArr,pageRef){
 j('#loading_Cat').show();
 var headerBackBtn=defaultPagePath+'backbtnPage.html';
 j.ajax({
@@ -2883,7 +2829,7 @@ j.ajax({
 						 requestRunning = false;
 						 j('#loading_Cat').hide();
 						 j('#mainHeader').load(headerBackBtn);
-						 j('#mainContainer').load(pageRefSuccess);
+						 j('#mainContainer').load(pageRef);
 						// appPageHistory.push(pageRef);
 						}
 					}else if(data.Status=="Failure"){
@@ -2891,329 +2837,20 @@ j.ajax({
 						requestRunning = false;
 					 	j('#loading_Cat').hide();
 						j('#mainHeader').load(headerBackBtn);
-					 	j('#mainContainer').load(pageRefFailure);
+					 	j('#mainContainer').load(pageRef);
 					 }else{
 						 j('#loading_Cat').hide();
 						successMessage = "Oops!! Something went wrong. Please contact system administrator.";
 						j('#mainHeader').load(headerBackBtn);
-					 	j('#mainContainer').load(pageRefFailure);
+					 	j('#mainContainer').load(pageRef);
 					 }
 					},
 				  error:function(data) {
 					j('#loading_Cat').hide();
 					requestRunning = false;
-                    alert(window.lang.translate('Error: Oops something is wrong, Please Contact System Administer'));
+					alert("Error: Oops something is wrong, Please Contact System Administer");
 				  }
 			});
 }
 
-function openNav() {
-    document.getElementById("mySidenav").style.width = "230px";
-}
 
-function closeNav() {
-    document.getElementById("mySidenav").style.width = "0";
-}
-
-
- function addHeader(){
-      var headerBackBtn=defaultPagePath+'backbtnPage.html';
-			j(document).ready(function() {
-				j('#mainHeader').load(headerBackBtn);
-			});
-	 }
-
-
-function fetchBusiEmpAdv(){
-	if(window.localStorage.getItem("EaInMobile") == "true"){
-        fetchBusinessExpNdEmployeeAdv();
-        document.getElementById('helpimage').style.display="";
-		//document.getElementById('EA').style.display="";
-	}else{
-        fetchExpenseClaimFromMain();
-        document.getElementById('helpimage').style.display="none";
-		document.getElementById('EA').style.display="none";
-	}
-}
-
-  function createBusiExpMain(){
-	resetImageData();
-	var headerBackBtn=defaultPagePath+'backbtnPage.html';
-    var pageRef=defaultPagePath+'businessExpenseMainPage.html';
-			j(document).ready(function() {
-				j('#mainHeader').load(headerBackBtn);
-				j('#mainContainer').load(pageRef);
-			});
-      appPageHistory.push(pageRef);
-	 }
-
-  function createTravelMain(){
-	resetImageData();
-	var headerBackBtn=defaultPagePath+'backbtnPage.html';
-    var pageRef=defaultPagePath+'travelMainPage.html';
-			j(document).ready(function() {
-				j('#mainHeader').load(headerBackBtn);
-				j('#mainContainer').load(pageRef);
-			});
-      appPageHistory.push(pageRef);
-	 }
-
-function onloadDefaultValue(){
-    clickedFlagCar = false;
-    clickedFlagTicket = false;
-    clickedFlagHotel = false;
-}
-
-// changes for sms app
-	 function createSMS(){
-		 
-		 var headerBackBtn=defaultPagePath+'headerPageForWalletOperation.html';
-		 var pageRef=defaultPagePath+'sms.html';
-			j(document).ready(function() {
-				j('#mainHeader').load(headerBackBtn);
-				j('#mainContainer').load(pageRef);
-			});
-      appPageHistory.push(pageRef);
-	 }
-	function initApp() {
-    	updateStatus('init app called' );
-        	if (! SMS ) { alert( 'SMS plugin not ready' ); return; }
-        	updateStatus('SMS count: ' + smsList.length );
-            document.addEventListener('onSMSArrive',function(e){
- 				saveIncomingSMSOnLocal(e);
-			 },false);
-            alert('end of init' );
-        }   
-
-
-	       function createEWallet(){
-		 
-		 var headerBackBtn=defaultPagePath+'headerPageForSMSOperation.html';
-		 var pageRef=defaultPagePath+'eWalletOptions.html';
-			j(document).ready(function() {
-				j('#mainHeader').load(headerBackBtn);
-				j('#mainContainer').load(pageRef);
-			});
-      appPageHistory.push(pageRef);
-	 }
-
-
-function viewMessages(){
-	/*var e = { "data" : {"address": "paytm", "body":"You have made payment of Rs.135.00 to om rest.", "date_sent":1482401219880}}
-	 saveIncomingSMSOnLocal(e);
-	 var e1 = { "data" : {"address": "freecharge", "body":"Recharge of BSNL mobile for Rs.54 was successful. operator refrence number is 0154324", "date_sent":1482601219880}}
-	 saveIncomingSMSOnLocal(e1);
-	 var e2 = { "data" : {"address": "uber", "body":"You paid uber Rs.134.65 with your paytm wallet. reference number for the transaction is 93123a24", "date_sent":1482701219880}}
-	 saveIncomingSMSOnLocal(e2);
-	 var e3 = { "data" : {"address": "paytm", "body":"Hi,  your order #142592342342 of Rs. 2490 for 2 items is successful. we will let you know once seller ships it.", "date_sent":1482201219880}}
-	 saveIncomingSMSOnLocal(e3);
-	 var e4 = { "data" : {"address": "Creditcard", "body":"hi, payment of your electricity bill was successful for Rs.987.", "date_sent":1482101219880}}
-	 saveIncomingSMSOnLocal(e4);*/
-
-	 //console.log("viewMessages  "+filtersStr)
-    var headerBackBtn=defaultPagePath+'headerPageForSMSOperation.html';
-    var pageRef=defaultPagePath+'fairMessageTable.html';
-	j(document).ready(function() {	
-		setTimeout(function(){
-              			 j('#mainHeader').load(headerBackBtn);
-						j('#mainContainer').load(pageRef);
-		 			}, 500);
-	});
-    appPageHistory.push(pageRef);
-    j('#loading_Cat').hide();
-}
-
-
-
-
-
- function getFormattedDateFromMillisec(input){
-    
-	var time = new Date(input);
-	var theyear=time.getFullYear();
-	var themonth=time.getMonth()+1;
-	var thetoday=time.getDate();
-    var months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-
-    return thetoday+"-"+months[(themonth-1)]+"-"+theyear;
-}
-
-function saveIncomingSMSOnLocal(e){
-	var sms =e.data;
-	smsList.push(sms);
-	// console.log(sms);
-	var senderAddress = ""+sms.address;	
-	senderAddress = senderAddress.toLowerCase();
-		if(senderAddress.includes("paytm") || senderAddress.includes("freecharge") 
-		|| senderAddress.includes("uber")|| senderAddress.includes("Creditcard")){
-		// console.log("inside if condition")
-		if(smsFilterBox(sms.body))
-			saveSMS(sms);     
-	}
-}
-function startWatch() {
-        	if(SMS) SMS.startWatch(function(){
-        			window.localStorage.setItem("smsWatchStatus",true);
-        			//smsWatchFlagStatus = true;
-        			//alert(updateStrForSMS+'watching started'); 
-        	}, function(){
-        		window.localStorage.setItem("smsWatchStatus",false);
-        		//smsWatchFlagStatus = false ;
-        		//alert(updateStrForSMS+'failed to start watching');
-        	});
-}
-
-function parseIncomingSMSForAmount(input){
-	var amount= "";
-	if(input.includes("Rs.")){
-        var msg = input.split("Rs.")
-
-        var test  =  msg[1];
-		var rsExtractStr = test.trim().split(" ");
-		amount = rsExtractStr[0];
-	}
-	return amount;
-}
-
-function operationsOnSMS(){
-	j(document).ready(function(){
-		       j('#discard').on('click', function(e){ 
-				  if(requestRunning){
-						  	return;
-	    					}
-	    			  var pageRef=defaultPagePath+'fairMessageTable.html';
-					  if(j("#source tr.selected").hasClass("selected")){
-						  j("#source tr.selected").each(function(index, row) {
-						  	requestRunning = true;
-							  var smsID = j(this).find('td.smsId').text();
-  							  	discardMessages(smsID);
-  							  	 j('#mainContainer').load(pageRef);
-  							  	 var SMSSuccessMsgForDelete="message/s deleted successfully.";
-								 document.getElementById("syncSuccessMsg").innerHTML = SMSSuccessMsgForDelete;
-								 j('#syncSuccessMsg').hide().fadeIn('slow').delay(3000).fadeOut('slow');
-								 requestRunning = false;
-						  });
-					  }else{
-						 alert("Tap and select messages for save.");
-					  }
-			});
-
-	});
-
-	j('#saveSMS').on('click', function(e){ 
-				  if(requestRunning){
-						  	return;
-	    					}
-	    			  var pageRef=defaultPagePath+'smsToExpense.html';
-					  if(j("#source tr.selected").hasClass("selected")){
-						  j("#source tr.selected").each(function(index, row) {
-						  	requestRunning = true;
-							  var smsID = j(this).find('td.smsId').text();
-							  var smsText = j(this).find('td.smsText').text();
-							  var smsSentDate = j(this).find('td.smsSentDate').text();
-							  var smsAmount = j(this).find('td.smsAmount').text();
-							 	smsToExpenseStr = smsID+"_"+smsText+"_"+smsSentDate	+"_"+smsAmount;
-  							  	discardMessages(smsID);	 
-							  	j('#mainContainer').load(pageRef);
-  							   	//  console.log("inside of save header btn click mthd "+smsToExpenseStr)
-  								//  var SMSSuccessMsgForDelete="message/s deleted successfully.";
-								 // document.getElementById("syncSuccessMsg").innerHTML = SMSSuccessMsgForDelete;
-								 // j('#syncSuccessMsg').hide().fadeIn('slow').delay(3000).fadeOut('slow');
-								 requestRunning = false;
-						  });
-					  }else{
-						 alert("Tap and select messages for save.");
-					  }
-	});
-}
-
-function smsFilterBox(smsText){
-	var filtersStr = window.localStorage.getItem("SMSFilterationStr");
-	//console.log("filtersStr  "+filtersStr)
-	var blockedWordsStr = filtersStr.split("@")[0];
-	var allowedWordsStr = filtersStr.split("@")[1];
-	var returnFlag = false;
-	var blockedFlag = false;
-	var blockedWords = blockedWordsStr.split("$");
-	smsText = smsText.toLowerCase();
-
-	for (var i = 0; i < blockedWords.length-1; i++) {
-		var word= blockedWords[i].toLowerCase();
-		//console.log("blockedWords  "+word)
-		if(smsText.includes(word)){
-			// console.log("blockedWord included "+word)
-			blockedFlag = true;
-			break;
-		}
-	}
-	if(!blockedFlag){
-		var allowedWords = allowedWordsStr.split("$");
-		for (var i = 0; i < allowedWords.length-1; i++) {
-			var word = allowedWords[i].toLowerCase();
-			//console.log("allowed  "+word)
-			if(smsText.includes(word)){
-				// console.log("allowed included "+word)
-				returnFlag = true;
-				break;
-			}
-		}
-	}else{
-		returnFlag = false;
-	}
-	return returnFlag;
-}
-
-function getExpenseDateFromSMS(input){
-	// converts date from dd-MMM-yyyy to mm/dd/yyyy 
-	var date = new Date(input);
-
-	return (date.getMonth()+1)+"/"+date.getDate()+"/"+date.getFullYear();
-}
-function hideSmartClaims(){
-	if(window.localStorage.getItem("smartClaimsViaSMSOnMobile") == "true"){
-		document.getElementById('smartClaimsID').style.display="";		
-	}else{
-		document.getElementById('smartClaimsID').style.display="none";
-	}
-}
-
-function hideMultilanguage(){
-	if(window.localStorage.getItem("multiLangInMobile") == "true"){
-		document.getElementById('multiLang').style.display="block";
-	}else{
-		document.getElementById('multiLang').style.display="none";
-	}
-}
-
-
-function populateMainPage(){
-    	j('#loading').show();
-    	var headerBackBtn=defaultPagePath+'categoryMsgPage.html';
-	    var pageRef=defaultPagePath+'category.html';
-    
-             j('#mainHeader').load(headerBackBtn);
-             j('#mainContainer').load(pageRef);
-              appPageHistory.push(pageRef);
-			  //addEmployeeDetails(data);
-                           
-                if(window.localStorage.getItem("EaInMobile") != null && 
-                 window.localStorage.getItem("EaInMobile")){
-                 synchronizeEAMasterData();
-               }
-            
-			  if(window.localStorage.getItem("TrRole") != null && 
-                 window.localStorage.getItem("TrRole")){
-				synchronizeTRMasterData();
-				synchronizeTRForTS();  
-			  }
-                synchronizeBEMasterData();
-                
-                
-            if(window.localStorage.getItem("smartClaimsViaSMSOnMobile") != null && 
-                 window.localStorage.getItem("smartClaimsViaSMSOnMobile")){
-                 synchronizeWhiteListMasterData();
-	               startWatch();
-                 }
-    
-         j('#loading').hide();
-     }

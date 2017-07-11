@@ -1,2 +1,2 @@
-# RevampExpenzing
-This reppository is used for test repository for iOS
+# testApp
+This repository is used for test repository for iOS

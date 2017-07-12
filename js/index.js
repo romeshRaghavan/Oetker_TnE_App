@@ -1812,7 +1812,7 @@ function oprationOnExpenseClaim(){
 						  jsonFindBE["amount"] = j(this).find('td.expAmt1').text();
 						  jsonFindBE["currencyId"] = j(this).find('td.currencyId').text();
 						  jsonFindBE["perUnitException"] = j(this).find('td.isEntitlementExceeded').text();
-
+                                                  jsonFindBE["locationId"] = j(this).find('td.locationId').text();
 						  var dataURL =  j(this).find('td.busAttachment').text();
 
 						  //For IOS image save

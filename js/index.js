@@ -573,7 +573,7 @@ function createLocationDropDown(jsonLocationArr){
 	j("#location").select2({
 		data:{ results: jsonArr, text: 'name' },
 		placeholder: "Location",
-		minimumResultsForSearch: -1,
+		//minimumResultsForSearch: -1,
 		initSelection: function (element, callback) {
 					callback(jsonArr[0]);
 		},

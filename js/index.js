@@ -1314,8 +1314,8 @@ function setPerUnitDetails(transaction, results){
 				attachGoogleSearchBox(document.getElementById("expFromLoc"));
 				attachGoogleSearchBox(document.getElementById("expToLoc"));
 				document.getElementById("mapImage").style.display="";
-				document.getElementById("expNarration").disabled =true;
-				document.getElementById("expNarration").style.backgroundColor='#d1d1d1';
+				//document.getElementById("expNarration").disabled =true;
+				//sdocument.getElementById("expNarration").style.backgroundColor='#d1d1d1';
 			} 
 		}
 		if(perUnitDetailsJSON.isUnitReqd=='Y'){

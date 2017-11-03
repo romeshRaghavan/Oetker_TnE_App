@@ -739,6 +739,8 @@ function validateExpenseDetails(exp_date,exp_from_loc,exp_to_loc,exp_narration,e
 		document.getElementById("expAmt").value = "";
 		return false;
 	}
+
+    
 	if(perUnitDetailsJSON.expenseIsfromAndToReqd!='N'){
 		if(exp_from_loc == ""){
 			alert("From Location is invalid");
@@ -748,6 +750,25 @@ function validateExpenseDetails(exp_date,exp_from_loc,exp_to_loc,exp_narration,e
 			alert("To Location is invalid");
 			return false;
 		}
+        
+        if(perUnitDetailsJSON.isUnitReqd != 'Y'){
+                if(window.localStorage.getItem("MobileMapRole") == 'true') 
+			{
+                if(exp_unit == " " || exp_unit == "" || exp_unit == "NA"){
+                    alert("Please check your internet connection Or selected From location/To location is  invalid.(Please select locations from dropdown.)");
+                    document.getElementById("expFromLoc").value = "";
+                    document.getElementById("expToLoc").value = "";
+                    document.getElementById("expUnit").value = "";
+                     return false;
+                }else{     
+    			if(isOnlyNumeric(exp_unit,"Unit")==false)
+			{
+				return false;
+			}
+            }
+        }
+    }
+     
 	}
 
 	if(exp_narration == ""){
@@ -755,24 +776,11 @@ function validateExpenseDetails(exp_date,exp_from_loc,exp_to_loc,exp_narration,e
 		return false;
 	}
 	
-	if(perUnitDetailsJSON.isUnitReqd == 'Y'){
-        if(window.localStorage.getItem("MobileMapRole") == 'true') 
-			{
-                if(exp_unit == " " || exp_unit == "" || exp_unit == "NA"){
-                    alert("Please make sure your internet connection is ON or selected From Location/To Location is selected from dropdown.");
-                    document.getElementById("expFromLoc").value = "";
-                    document.getElementById("expToLoc").value = "";
-		    document.getElementById("expUnit").value = "";
-              return false;
-                }else{     
-                	if(isOnlyNumeric(exp_unit,"Unit")==false)
-			{
-				return false;
-			}
-                }
-                
-            }else{
-	    if(exp_unit != ""){
+    
+    
+    if(perUnitDetailsJSON.expIsUnitReq == 'Y'){
+
+		if(exp_unit != ""){
 			if(isOnlyNumeric(exp_unit,"Unit")==false)
 			{
 				return false;
@@ -782,29 +790,8 @@ function validateExpenseDetails(exp_date,exp_from_loc,exp_to_loc,exp_narration,e
 			alert("Unit is invalid");
 			return false;
 		}
-            }
-        
-        
-	}else{
-         if(window.localStorage.getItem("MobileMapRole") == 'true') 
-			{
-                if(exp_unit == " " || exp_unit == "" || exp_unit == "NA"){
-                    alert("Please make sure your internet connection is ON or selected From Location/To Location is selected from dropdown.");
-                    document.getElementById("expFromLoc").value = "";
-                    document.getElementById("expToLoc").value = "";
-		    document.getElementById("expUnit").value = "";
-                     return false;
-                }else{     
-    			if(isOnlyNumeric(exp_unit,"Unit")==false)
-			{
-				return false;
-			}
-                
-            }
-        }
-    }
+	}
 		
-
 		if(exp_amt != ""){
 			if(isOnlyNumeric(exp_amt,"Amount")==false)
 			{

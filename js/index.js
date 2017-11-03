@@ -762,6 +762,7 @@ function validateExpenseDetails(exp_date,exp_from_loc,exp_to_loc,exp_narration,e
                     alert("Please make sure your internet connection is ON or selected From Location/To Location is selected from dropdown.");
                     document.getElementById("expFromLoc").value = "";
                     document.getElementById("expToLoc").value = "";
+		    document.getElementById("expUnit").value = "";
               return false;
                 }else{     
                 	if(isOnlyNumeric(exp_unit,"Unit")==false)
@@ -791,6 +792,7 @@ function validateExpenseDetails(exp_date,exp_from_loc,exp_to_loc,exp_narration,e
                     alert("Please make sure your internet connection is ON or selected From Location/To Location is selected from dropdown.");
                     document.getElementById("expFromLoc").value = "";
                     document.getElementById("expToLoc").value = "";
+		    document.getElementById("expUnit").value = "";
                      return false;
                 }else{     
     			if(isOnlyNumeric(exp_unit,"Unit")==false)

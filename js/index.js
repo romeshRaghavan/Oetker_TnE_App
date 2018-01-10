@@ -1,7 +1,7 @@
 var j = jQuery.noConflict();
 var defaultPagePath='app/pages/';
 var headerMsg = "Expenzing";
-var urlPath = "http://oetker.expenzing.com/oetker_tne/WebService/Login/";
+var urlPath = "https://oetker.expenzing.com/oetker_tne/WebService/Login/";
 //var WebServicePath = 'http://live.nexstepapps.com:8284/NexstepWebService/mobileLinkResolver.service';
 var clickedFlagCar = false;
 var clickedFlagTicket = false;
